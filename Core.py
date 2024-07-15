@@ -36,10 +36,10 @@ class Core:
         for i in freq_temp: # normalizing frequencies
             self.frequency_norm.append(i / max_f)
 
-    def calculate_power_consumption(self):
+    def calculate_power_consumption(self, f, v):
         # based on operating voltage-frequency
         return (self.I_sub * self.operating.v) + \
-            (self.C_eff * self.operating.v * self.operating.v * self.operating.f)
+            (self.C_eff * v * v * f)
     
     def calculate_fault_rate (self):
         return self.initial_fault_rate * 10 ** ((max(self.voltages) - self.operating.v) / self.delta)

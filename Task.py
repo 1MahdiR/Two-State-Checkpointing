@@ -5,6 +5,8 @@ from Core import Core
 
 # Times are based on micro-seconds
 
+CONST_E_MEM = 0.46
+
 class Fault:
     def __init__(self, time: int):
          self.time = time
@@ -100,7 +102,7 @@ class Task:
                 ni = d - (r + t + c)
                 
                 if ni >= t:
-                    schemes.append([Non_Uniform_Checkpoint(shift + t - c)])
+                    schemes.append(self.calculate_checkpoint_scheme(shift + t - c, ui, 999999))
                     break
                 else:
                     schemes.append(self.calculate_checkpoint_scheme(ni + shift, ui, 999999))
@@ -114,11 +116,12 @@ class Task:
         else:
             while t > 0:
                 n = self.calculate_n_optu(k-1, t)
+                #print(n)
                 ni = d - (r + self.calculate_wcet(k-1, n, t))
                 ui = t // n
 
                 if ni >= t:
-                    schemes.append([Non_Uniform_Checkpoint(shift + t + c)])
+                    schemes.append(self.calculate_checkpoint_scheme(shift + t, ui, n))
                     break
                 else:
                     schemes.append(self.calculate_checkpoint_scheme(ni + shift, ui, n))
@@ -137,6 +140,7 @@ class Task:
         d = 0
 
         schemes = self.calculate_all_checkpoint_schemes()
+        print(schemes)
 
         non_uniforms = list()
         uniforms = list()
@@ -149,9 +153,14 @@ class Task:
         last_checkpoint_execution_time = 0
         last_checkpoint = 0
         uniform_index = -1
+        #print(non_uniforms)
+        #n = self.calculate_n_optu(1, self.execution_time)
+        #print(n)
+        #print(self.execution_time / n)
+        #print(self.calculate_wcet(2, n, self.execution_time))
 
         print("Task start:")
-        while t < self.execution_time and d < self.deadline:
+        while t <= self.execution_time and d <= self.deadline:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
             
@@ -162,6 +171,7 @@ class Task:
                     self.faults.remove(fault)
 
             BREAKOUT = False
+            
 
             for checkpoint in non_uniforms:
                 if checkpoint.time == d:
@@ -198,7 +208,7 @@ class Task:
             raise Exception("Deadline missed!!!")
         
         uniform_scheme = uniforms[uniform_index]
-        while t < self.execution_time and d < self.deadline:
+        while t <= self.execution_time and d <= self.deadline:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
             
@@ -242,6 +252,69 @@ class Task:
             raise Exception("Deadline missed!!!")
         else:
             print("Task finished!")
-            print("Total execution time: %d" % d)
-            
+            print("Total execution time: %d" % (d-1))
 
+    def calculate_scheme_energy(self, scheme, p, f, v):
+        return ((self.execution_time + len(scheme) * self.checkpoint_insertion) / p) * self.core.calculate_power_consumption(f, v) + len(scheme) * CONST_E_MEM
+            
+    def calculate_all_checkpoint_schemes_with_best_dvs(self):
+
+        for voltage_frequency in self.core.voltage_frequency:
+            schemes = list()
+
+            t = self.execution_time
+            d = self.deadline
+            c = self.checkpoint_insertion
+            r = self.rollback
+            k = self.tolerable_faults
+
+            shift = 0
+
+            p = voltage_frequency.f / self.core.voltage_frequency[-1].f
+
+            if k == 1:
+                while t > 0:
+                    ui = t
+                    ni = p * (d - (r + t + c))
+                    
+                    if ni >= t:
+                        scheme = self.calculate_checkpoint_scheme(shift + t - c, ui, 999999)
+                        schemes.append((scheme, p, voltage_frequency.f, 
+                                        self.calculate_scheme_energy(voltage_frequency.f, voltage_frequency.v)))
+                        break
+                    else:
+                        scheme = self.calculate_checkpoint_scheme(ni + shift, ui, 999999)
+                        schemes.append((scheme, p, voltage_frequency.f,
+                                        self.calculate_scheme_energy(voltage_frequency.f, voltage_frequency.v)))
+
+                    if ni <= 0:
+                        continue
+                    
+                    d = d - (ni - c)/p
+                    t = t - ni
+                    shift = shift + ni + c
+            else:
+                while t > 0:
+                    n = self.calculate_n_optu(k-1, t)
+                    ni = p * (d - (r + self.calculate_wcet(k-1, n, t)))
+                    ui = t // n
+
+                    if ni >= t:
+                        scheme = self.calculate_checkpoint_scheme(shift + t, ui, n)
+                        schemes.append((scheme, p, voltage_frequency.f,
+                                        self.calculate_scheme_energy(scheme, p, voltage_frequency.f, voltage_frequency.v)))
+                        break
+                    else:
+                        scheme = self.calculate_checkpoint_scheme(ni + shift, ui, n)
+                        schemes.append((scheme, p, voltage_frequency.f,
+                                        self.calculate_scheme_energy(scheme, p, voltage_frequency.f, voltage_frequency.v)))
+
+                    if ni <= 0:
+                        continue
+                    
+                    d = d - (ni - c)/p
+                    t = t - ni
+                    shift = shift + ni + c
+
+            print(schemes)
+            print()
