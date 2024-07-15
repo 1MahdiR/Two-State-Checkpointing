@@ -139,6 +139,9 @@ class Task:
         t = 0
         d = 0
 
+        v = self.core.voltage_frequency[-1].v
+        f = self.core.voltage_frequency[-1].f
+
         schemes = self.calculate_all_checkpoint_schemes()
         print(schemes)
 
@@ -152,6 +155,7 @@ class Task:
 
         last_checkpoint_execution_time = 0
         last_checkpoint = 0
+        n_checkpoint = 0
         uniform_index = -1
         #print(non_uniforms)
         #n = self.calculate_n_optu(1, self.execution_time)
@@ -175,6 +179,7 @@ class Task:
             for checkpoint in non_uniforms:
                 if checkpoint.time == d:
                     print("checkpoint set!")
+                    n_checkpoint += 1
                     d += self.checkpoint_insertion
                     print(checkpoint)
                     uniform_index = non_uniforms.index(checkpoint)
@@ -205,6 +210,10 @@ class Task:
 
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
+
+        E_ni = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+        d_temp = d
+        n_checkpoint = 0
 
         uniform_scheme = uniforms[uniform_index]
         while t <= self.execution_time and d <= self.deadline:
@@ -252,6 +261,10 @@ class Task:
         else:
             print("Task finished!")
             print("Total execution time: %d" % (d-1))
+            E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+            print("Power consumption in non-uniform state: %f" % E_ni)
+            print("Power consumption in uniform state: %f" % E_ui)
+            print("Total power consumption state: %f" % (E_ni + E_ui))
 
     def calculate_scheme_energy(self, scheme, p, f, v):
         return ((self.execution_time + len(scheme) * self.checkpoint_insertion) / p) * self.core.calculate_power_consumption(f, v) + len(scheme) * CONST_E_MEM
@@ -411,8 +424,9 @@ class Task:
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
 
-        E_ni = ((d + n_checkpoint * self.checkpoint_insertion) / p) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+        E_ni = (d / p) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
         d_temp = d
+        n_checkpoint = 0
         t = floor(t * p)
 
         uniform_scheme = uniforms[uniform_index]
@@ -461,9 +475,9 @@ class Task:
         else:
             print("Task finished!")
             print("Total execution time: %d" % (d-1))
-        v = self.core.voltage_frequency[-1].v
-        f = self.core.voltage_frequency[-1].f
-        E_ui = ((d-d_temp) + n_checkpoint * self.checkpoint_insertion) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
-        print("Power consumption in non-uniform state: %f" % E_ni)
-        print("Power consumption in uniform state: %f" % E_ui)
-        print("Total power consumption state: %f" % (E_ni + E_ui))
+            v = self.core.voltage_frequency[-1].v
+            f = self.core.voltage_frequency[-1].f
+            E_ui = (d-d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+            print("Power consumption in non-uniform state: %f" % E_ni)
+            print("Power consumption in uniform state: %f" % E_ui)
+            print("Total power consumption state: %f" % (E_ni + E_ui))

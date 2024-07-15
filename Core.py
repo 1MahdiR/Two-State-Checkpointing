@@ -7,17 +7,17 @@ class Volatage_Frequency:
     def __init__(self, voltage, frequency):
         self.v = voltage
         self.f = frequency
-    
+
     def __repr__(self):
         return "voltage-frequency(%fv, %fGhz)" % (self.v, self.f)
-    
+
     def __str__(self):
         return self.__repr__()
 
 class Core:
     def __init__(self, voltage_frequency:list, initial_fault_rate:float, I_sub:float,C_eff:float,
                  delta:float):
-        
+
         self.voltage_frequency = sorted(voltage_frequency, key=lambda x: x.f)
         self.voltages = [ x.v for x in voltage_frequency ]
         self.initial_fault_rate = initial_fault_rate
@@ -25,7 +25,7 @@ class Core:
         self.I_sub = I_sub
         self.C_eff = C_eff
         self.delta = delta
-        
+
         self.frequency_norm = list()
         freq_temp = list()
         for i in voltage_frequency: # get the operating frequencies and voltages
@@ -38,9 +38,9 @@ class Core:
 
     def calculate_power_consumption(self, f, v):
         # based on operating voltage-frequency
-        return (self.I_sub * self.operating.v) + \
+        return (self.I_sub * v) + \
             (self.C_eff * v * v * f)
-    
+
     def calculate_fault_rate (self):
         return self.initial_fault_rate * 10 ** ((max(self.voltages) - self.operating.v) / self.delta)
 
@@ -52,7 +52,6 @@ class Core:
                                                                              self.I_sub,
                                                                              self.C_eff,
                                                                              self.delta)
-    
+
     def __str__(self):
         return self.__repr__()
-    
