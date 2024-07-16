@@ -481,3 +481,78 @@ class Task:
             print("Power consumption in non-uniform state: %f" % E_ni)
             print("Power consumption in uniform state: %f" % E_ui)
             print("Total power consumption state: %f" % (E_ni + E_ui))
+
+    def run_non_uniform(self):
+        t = 0
+        d = 0
+
+        v = self.core.voltage_frequency[-1].v
+        f = self.core.voltage_frequency[-1].f
+
+        schemes = self.calculate_all_checkpoint_schemes()
+
+        non_uniforms = list()
+        for i in schemes:
+            non_uniforms.append(i[0])
+
+        print(non_uniforms)
+
+        FAULTY = False
+
+        last_checkpoint_execution_time = 0
+        last_checkpoint = 0
+        n_checkpoint = 0
+        uniform_index = -1
+        #print(non_uniforms)
+        #n = self.calculate_n_optu(1, self.execution_time)
+        #print(n)
+        #print(self.execution_time / n)
+        #print(self.calculate_wcet(2, n, self.execution_time))
+
+        print("Task start:")
+        print("Non-uniform checkpointing scheme!")
+        while t <= self.execution_time and d <= self.deadline:
+            if d and d % 100 == 0:
+                print("task execution status: (executed time: %d, total time: %d)" % (t, d))
+
+            for fault in self.faults:
+                if fault.time == d:
+                    print("fault occured!")
+                    FAULTY = True
+                    self.faults.remove(fault)
+
+            for checkpoint in non_uniforms:
+                if checkpoint.time == d:
+                    print("checkpoint set!")
+                    n_checkpoint += 1
+                    d += self.checkpoint_insertion
+                    print(checkpoint)
+                    uniform_index = non_uniforms.index(checkpoint)
+
+                    non_uniforms.remove(checkpoint)
+                    if FAULTY:
+                        print("fault detected!!")
+                        print("rollback to %d" % last_checkpoint_execution_time)
+                        t = last_checkpoint_execution_time
+
+                        FAULTY = False
+
+                        t += 1
+                        d += 1
+                        last_checkpoint = checkpoint.time
+                        break
+
+                    last_checkpoint_execution_time = t
+                    last_checkpoint = checkpoint.time
+
+            t += 1
+            d += 1
+
+        if d > self.deadline:
+            raise Exception("Deadline missed!!!")
+
+        E_ni = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+
+        print("Task finished!")
+        print("Total execution time: %d" % (d-1))
+        print("Total power consumption state: %f" % E_ni)
