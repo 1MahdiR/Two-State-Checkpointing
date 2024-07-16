@@ -1,5 +1,6 @@
 
-from math import sqrt, floor, ceil
+from math import sqrt, floor, ceil, factorial
+from math import e as e_num
 
 from Core import Core
 
@@ -48,6 +49,26 @@ class Task:
         self.rollback = rollback
 
         self.checkpoints = []
+
+    def calculate_reliability(self, k, v, f, n):
+        f_max = self.core.voltage_frequency[-1].f
+        v_max = max(self.core.voltages)
+        p = f / f_max
+
+        et = self.execution_time / p
+
+        fault_rate = self.core.calculate_fault_rate(v)
+
+        WCET = self.calculate_wcet(k, n, et)
+        
+        R = 0
+        for i in range(k+1):
+            top = ((fault_rate * WCET) ** i) * (e_num ** (-fault_rate * WCET))
+            bottom = factorial(i)
+
+            R += top / bottom
+
+        return R
 
     def calculate_n_optu(self, tolerable_faults, execution_time):
         k = tolerable_faults
@@ -224,7 +245,7 @@ class Task:
 
         E_ni = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
         d_temp = d
-        n_checkpoint = 0
+        n_checkpoint_ui = 0
 
         uniform_scheme = uniforms[uniform_index]
         while t <= self.execution_time and d <= self.deadline:
@@ -244,6 +265,7 @@ class Task:
                     print("checkpoint set!")
                     d += self.checkpoint_insertion
                     print(checkpoint)
+                    n_checkpoint_ui += 1
                     uniform_scheme.remove(checkpoint)
                     if FAULTY:
                         print("fault detected!!")
@@ -270,10 +292,12 @@ class Task:
         else:
             print("Task finished!")
             print("Total execution time: %d" % (d-1))
-            E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+            E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint_ui * CONST_E_MEM
             print("Power consumption in non-uniform state: %f" % E_ni)
             print("Power consumption in uniform state: %f" % E_ui)
             print("Total power consumption state: %f" % (E_ni + E_ui))
+            R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint_ui + n_checkpoint)
+            print("Reliability: %f" % R)
 
     def calculate_scheme_energy(self, scheme, p, f, v):
         return ((self.execution_time + len(scheme) * self.checkpoint_insertion) / p) * self.core.calculate_power_consumption(f, v) + len(scheme) * CONST_E_MEM
@@ -430,7 +454,7 @@ class Task:
 
         E_ni = (d / p) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
         d_temp = d
-        n_checkpoint = 0
+        n_checkpoint_ui = 0
         t = floor(t * p)
 
         uniform_scheme = uniforms[uniform_index]
@@ -451,6 +475,7 @@ class Task:
                     print("checkpoint set!")
                     d += self.checkpoint_insertion
                     print(checkpoint)
+                    n_checkpoint_ui += 1
                     uniform_scheme.remove(checkpoint)
                     if FAULTY:
                         print("fault detected!!")
@@ -479,12 +504,15 @@ class Task:
         else:
             print("Task finished!")
             print("Total execution time: %d" % (d-1))
+            v_tmp, f_tmp = v, f
             v = self.core.voltage_frequency[-1].v
             f = self.core.voltage_frequency[-1].f
-            E_ui = (d-d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+            E_ui = (d-d_temp) * self.core.calculate_power_consumption(f, v) + (n_checkpoint + n_checkpoint_ui) * CONST_E_MEM
             print("Power consumption in non-uniform state: %f" % E_ni)
             print("Power consumption in uniform state: %f" % E_ui)
             print("Total power consumption state: %f" % (E_ni + E_ui))
+            R = self.calculate_reliability(self.tolerable_faults, v_tmp, f_tmp, (n_checkpoint + n_checkpoint_ui))
+            print("Reliability: %f" % R)
 
     def run_non_uniform(self):
         t = 0
@@ -550,6 +578,8 @@ class Task:
         print("Task finished!")
         print("Total execution time: %d" % (d-1))
         print("Total power consumption state: %f" % E_ni)
+        R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
+        print("Reliability: %f" % R)
 
     def run_uniform(self):
         t = 0
@@ -610,3 +640,5 @@ class Task:
         print("Task finished!")
         print("Total execution time: %d" % (d-1))
         print("Total power consumption state: %f" % E_ui)
+        R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
+        print("Reliability: %f" % R)

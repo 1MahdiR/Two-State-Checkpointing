@@ -1,7 +1,7 @@
 
 I_SUB = 1
 C_EFF = 1
-DELTA = 1
+DELTA = 3
 
 class Volatage_Frequency:
     def __init__(self, voltage, frequency):
@@ -41,8 +41,8 @@ class Core:
         return (self.I_sub * v) + \
             (self.C_eff * v * v * f)
 
-    def calculate_fault_rate (self):
-        return self.initial_fault_rate * 10 ** ((max(self.voltages) - self.operating.v) / self.delta)
+    def calculate_fault_rate (self, v):
+        return self.initial_fault_rate * 10 ** ((max(self.voltages) - v) / self.delta)
 
 
     def __repr__(self):
