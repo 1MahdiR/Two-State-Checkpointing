@@ -3,9 +3,7 @@ from math import sqrt, floor, ceil
 
 from Core import Core
 
-# Times are based on micro-seconds
-
-CONST_E_MEM = 0.46
+CONST_E_MEM = 4.6
 
 class Fault:
     def __init__(self, time: int):
@@ -72,6 +70,24 @@ class Task:
         r = self.rollback
 
         return t + n * c + k * (r + (t // n))
+    
+    def calculate_uniform_checkpoint_scheme(self):
+        n_optu = self.calculate_n_optu(self.tolerable_faults, self.execution_time)
+        scheme = list()
+
+        ui = self.execution_time // n_optu
+
+        t = ui
+        scheme.append(Uniform_Checkpoint(ui))
+        t += ui + self.checkpoint_insertion
+        n_optu -= 1
+
+        while t < self.deadline and n_optu:
+            scheme.append(Uniform_Checkpoint(t))
+            t += ui + self.checkpoint_insertion
+            n_optu -= 1
+        
+        return scheme
 
     def calculate_checkpoint_scheme(self, time, interval, number_of_uniform_checkpoints):
         scheme = list()
@@ -157,11 +173,6 @@ class Task:
         last_checkpoint = 0
         n_checkpoint = 0
         uniform_index = -1
-        #print(non_uniforms)
-        #n = self.calculate_n_optu(1, self.execution_time)
-        #print(n)
-        #print(self.execution_time / n)
-        #print(self.calculate_wcet(2, n, self.execution_time))
 
         print("Task start:")
         while t <= self.execution_time and d <= self.deadline:
@@ -246,8 +257,6 @@ class Task:
                     last_checkpoint_execution_time = t
 
                     break
-
-            #print(t, d)
 
             if CONTINUE:
                 continue
@@ -368,11 +377,6 @@ class Task:
         last_checkpoint = 0
         n_checkpoint = 0
         uniform_index = -1
-        #print(non_uniforms)
-        #n = self.calculate_n_optu(1, self.execution_time)
-        #print(n)
-        #print(self.execution_time / n)
-        #print(self.calculate_wcet(2, n, self.execution_time))
 
         print("Task start:")
         print("DVS enabled.")
@@ -500,14 +504,7 @@ class Task:
         FAULTY = False
 
         last_checkpoint_execution_time = 0
-        last_checkpoint = 0
         n_checkpoint = 0
-        uniform_index = -1
-        #print(non_uniforms)
-        #n = self.calculate_n_optu(1, self.execution_time)
-        #print(n)
-        #print(self.execution_time / n)
-        #print(self.calculate_wcet(2, n, self.execution_time))
 
         print("Task start:")
         print("Non-uniform checkpointing scheme!")
@@ -527,7 +524,6 @@ class Task:
                     n_checkpoint += 1
                     d += self.checkpoint_insertion
                     print(checkpoint)
-                    uniform_index = non_uniforms.index(checkpoint)
 
                     non_uniforms.remove(checkpoint)
                     if FAULTY:
@@ -539,11 +535,9 @@ class Task:
 
                         t += 1
                         d += 1
-                        last_checkpoint = checkpoint.time
                         break
 
                     last_checkpoint_execution_time = t
-                    last_checkpoint = checkpoint.time
 
             t += 1
             d += 1
@@ -556,3 +550,63 @@ class Task:
         print("Task finished!")
         print("Total execution time: %d" % (d-1))
         print("Total power consumption state: %f" % E_ni)
+
+    def run_uniform(self):
+        t = 0
+        d = 0
+
+        v = self.core.voltage_frequency[-1].v
+        f = self.core.voltage_frequency[-1].f
+
+        scheme = self.calculate_uniform_checkpoint_scheme()
+        print(scheme)
+
+        FAULTY = False
+
+        last_checkpoint_execution_time = 0
+        n_checkpoint = 0
+
+        print("Task start:")
+        print("Uniform checkpointing scheme!")
+        while t <= self.execution_time and d <= self.deadline:
+            if d and d % 100 == 0:
+                print("task execution status: (executed time: %d, total time: %d)" % (t, d))
+
+            for fault in self.faults:
+                if fault.time == d:
+                    print("fault occured!")
+                    FAULTY = True
+                    self.faults.remove(fault)
+
+            for checkpoint in scheme:
+                if checkpoint.time == d:
+                    print("checkpoint set!")
+                    n_checkpoint += 1
+                    d += self.checkpoint_insertion
+                    print(checkpoint)
+
+                    scheme.remove(checkpoint)
+                    if FAULTY:
+                        print("fault detected!!")
+                        print("rollback to %d" % last_checkpoint_execution_time)
+                        t = last_checkpoint_execution_time
+
+                        FAULTY = False
+
+                        t += 1
+                        d += 1
+                        break
+
+                    last_checkpoint_execution_time = t
+
+            t += 1
+            d += 1
+
+        if d > self.deadline:
+            raise Exception("Deadline missed!!!")
+
+        E_ui = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+
+        print("Task finished!")
+        print("Total execution time: %d" % (d-1))
+        print("Total power consumption state: %f" % E_ui)
