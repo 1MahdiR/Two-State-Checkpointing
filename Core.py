@@ -1,3 +1,4 @@
+from bcolor import *
 
 I_SUB = 1
 C_EFF = 1
@@ -9,7 +10,7 @@ class Volatage_Frequency:
         self.f = frequency
 
     def __repr__(self):
-        return "voltage-frequency(%fv, %fGhz)" % (self.v, self.f)
+        return WARNING + ("voltage-frequency(%fv, %fGhz)" % (self.v, self.f)) + ENDC
 
     def __str__(self):
         return self.__repr__()
@@ -34,11 +35,11 @@ class Core:
 
 
     def __repr__(self):
-        return "core(voltage-frequency:%s, I_sub:%f, C_eff:%f, delta:%f)" % \
+        return WARNING + ("core(voltage-frequency:%s, I_sub:%f, C_eff:%f, delta:%f)" % \
                                                                             (self.voltage_frequency,
                                                                              self.I_sub,
                                                                              self.C_eff,
-                                                                             self.delta)
+                                                                             self.delta)) + ENDC
 
     def __str__(self):
         return self.__repr__()

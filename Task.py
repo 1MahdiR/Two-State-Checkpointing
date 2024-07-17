@@ -1,8 +1,8 @@
-
 from math import sqrt, floor, ceil, factorial
 from math import e as e_num
 
 from Core import Core
+from bcolor import *
 
 CONST_E_MEM = 4.6
 
@@ -11,7 +11,7 @@ class Fault:
          self.time = time
 
     def __repr__(self):
-        return "fault(time:%d, persistence:%d)" % (self.time, self.persistence)
+        return FAIL + ("fault(time:%d)" % (self.time)) + ENDC
 
     def __str__(self):
         return self.__repr__()
@@ -21,7 +21,7 @@ class Non_Uniform_Checkpoint:
         self.time = time
 
     def __repr__(self):
-        return "non-uniform checkpoint(time:%d)" % self.time
+        return WARNING + ("non-uniform checkpoint(time:%d)" % self.time) + ENDC
 
     def __str__(self):
         return self.__repr__()
@@ -31,7 +31,7 @@ class Uniform_Checkpoint:
         self.time = time
 
     def __repr__(self):
-        return "uniform checkpoint(time:%d)" % self.time
+        return WARNING + ("uniform checkpoint(time:%d)" % self.time) + ENDC
 
     def __str__(self):
         return self.__repr__()
@@ -52,7 +52,6 @@ class Task:
 
     def calculate_reliability(self, k, v, f, n, et=None):
         f_max = self.core.voltage_frequency[-1].f
-        v_max = max(self.core.voltages)
         p = f / f_max
 
         if et == None:
@@ -200,7 +199,7 @@ class Task:
         n_checkpoint = 0
         uniform_index = -1
 
-        print("Task start:")
+        print(OKGREEN + "Task start:" + ENDC)
         while t <= self.execution_time and d <= self.deadline:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
@@ -208,6 +207,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -231,7 +231,7 @@ class Task:
 
                         t += 1
                         d += 1
-                        print("switching to uniform!")
+                        print(WARNING + "switching to uniform!" + ENDC)
                         BREAKOUT = True
                         break
 
@@ -258,6 +258,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -288,13 +289,12 @@ class Task:
             t += 1
             d += 1
 
-
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
         else:
             print()
-            print("Task finished!")
-            print("--------------")
+            print(OKGREEN + BOLD + "Task finished!" + ENDC)
+            print(OKGREEN + BOLD + "--------------" + ENDC)
             print("Total execution time: %d" % (d-1))
             E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint_ui * CONST_E_MEM
             print("Power consumption in non-uniform state: %f" % E_ni)
@@ -381,10 +381,6 @@ class Task:
         d = 0
 
         schemes = self.calculate_all_checkpoint_schemes_with_best_dvs()
-        print("All checkpointing schemes:")
-        for item in schemes:
-            print(item)
-        print()
 
         scheme = schemes[0]
         p = scheme[0][1]
@@ -392,7 +388,10 @@ class Task:
         v = scheme[0][3]
 
         checkpointing_scheme = tuple([ x[0] for x in scheme ])
-        print(checkpointing_scheme)
+        print("All checkpointing schemes:")
+        for item in checkpointing_scheme:
+            print(item)
+        print()
 
         non_uniforms = list()
         uniforms = list()
@@ -406,8 +405,8 @@ class Task:
         n_checkpoint = 0
         uniform_index = -1
 
-        print("Task start:")
-        print("DVS enabled.")
+        print(OKGREEN + "Task start:" + ENDC)
+        print(WARNING + "DVS enabled." + ENDC)
         while t <= self.execution_time / p and d <= self.deadline:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
@@ -415,6 +414,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -438,8 +438,8 @@ class Task:
 
                         t += 1
                         d += 1
-                        print("switching to uniform!")
-                        print("DVS disabled.")
+                        print(WARNING + "switching to uniform!" + ENDC)
+                        print(WARNING + "DVS disabled." + ENDC)
                         BREAKOUT = True
                         break
 
@@ -469,6 +469,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -499,13 +500,12 @@ class Task:
             t += 1
             d += 1
 
-
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
         else:
             print()
-            print("Task finished!")
-            print("--------------")
+            print(OKGREEN + BOLD + "Task finished!" + ENDC)
+            print(OKGREEN + BOLD + "--------------" + ENDC)
             print("Total execution time: %d" % (d-1))
             v_tmp, f_tmp = v, f
             v = self.core.voltage_frequency[-1].v
@@ -539,7 +539,7 @@ class Task:
         last_checkpoint_execution_time = 0
         n_checkpoint = 0
 
-        print("Task start:")
+        print(OKGREEN + "Task start:" + ENDC)
         print("Non-uniform checkpointing scheme!")
         while t <= self.execution_time and d <= self.deadline:
             if d and d % 100 == 0:
@@ -548,6 +548,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -581,8 +582,8 @@ class Task:
         E_ni = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
 
         print()
-        print("Task finished!")
-        print("--------------")
+        print(OKGREEN + BOLD + "Task finished!" + ENDC)
+        print(OKGREEN + BOLD + "--------------" + ENDC)
         print("Total execution time: %d" % (d-1))
         print("Total power consumption state: %f" % E_ni)
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
@@ -605,7 +606,7 @@ class Task:
         last_checkpoint_execution_time = 0
         n_checkpoint = 0
 
-        print("Task start:")
+        print(OKGREEN + "Task start:" + ENDC)
         print("Uniform checkpointing scheme!")
         while t <= self.execution_time and d <= self.deadline:
             if d and d % 100 == 0:
@@ -614,6 +615,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -647,8 +649,8 @@ class Task:
         E_ui = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
 
         print()
-        print("Task finished!")
-        print("--------------")
+        print(OKGREEN + BOLD + "Task finished!" + ENDC)
+        print(OKGREEN + BOLD + "--------------" + ENDC)
         print("Total execution time: %d" % (d-1))
         print("Total power consumption state: %f" % E_ui)
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
@@ -703,7 +705,7 @@ class Task:
         n_checkpoint = 0
         uniform_index = -1
 
-        print("Task start:")
+        print(OKGREEN + "Task start:" + ENDC)
         while t <= self.execution_time and d <= self.deadline:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
@@ -711,6 +713,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -734,7 +737,7 @@ class Task:
 
                         t += 1
                         d += 1
-                        print("switching to uniform!")
+                        print(WARNING + "switching to uniform!" + ENDC)
                         BREAKOUT = True
                         break
 
@@ -761,6 +764,7 @@ class Task:
             for fault in self.faults:
                 if fault.time == d:
                     print("fault occured!")
+                    print(fault)
                     FAULTY = True
                     self.faults.remove(fault)
 
@@ -791,13 +795,12 @@ class Task:
             t += 1
             d += 1
 
-
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
         else:
             print()
-            print("Task finished!")
-            print("--------------")
+            print(OKGREEN + BOLD + "Task finished!" + ENDC)
+            print(OKGREEN + BOLD + "--------------" + ENDC)
             print("Total execution time: %d" % (d-1))
             E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint_ui * CONST_E_MEM
             print("Power consumption in non-uniform state: %f" % E_ni)
