@@ -666,6 +666,137 @@ class Task:
                 break
 
             k += 1
-        
-        print(k)
+            
         return k
+    
+    def run_reliability_taret(self, R_target):
+        t = 0
+        d = 0
+
+        v = self.core.voltage_frequency[-1].v
+        f = self.core.voltage_frequency[-1].f
+
+        k = self.find_minimum_k(R_target, v, f)
+        k_tmp = self.tolerable_faults
+        self.tolerable_faults = k
+
+        schemes = self.calculate_all_checkpoint_schemes()
+        print(schemes)
+
+        non_uniforms = list()
+        uniforms = list()
+        for i in schemes:
+            non_uniforms.append(i[0])
+            uniforms.append(i[1:])
+
+        FAULTY = False
+
+        last_checkpoint_execution_time = 0
+        last_checkpoint = 0
+        n_checkpoint = 0
+        uniform_index = -1
+
+        print("Task start:")
+        while t <= self.execution_time and d <= self.deadline:
+            if d and d % 100 == 0:
+                print("task execution status: (executed time: %d, total time: %d)" % (t, d))
+
+            for fault in self.faults:
+                if fault.time == d:
+                    print("fault occured!")
+                    FAULTY = True
+                    self.faults.remove(fault)
+
+            BREAKOUT = False
+
+            for checkpoint in non_uniforms:
+                if checkpoint.time == d:
+                    print("checkpoint set!")
+                    n_checkpoint += 1
+                    d += self.checkpoint_insertion
+                    print(checkpoint)
+                    uniform_index = non_uniforms.index(checkpoint)
+
+                    non_uniforms.remove(checkpoint)
+                    if FAULTY:
+                        print("fault detected!!")
+                        print("rollback to %d" % last_checkpoint_execution_time)
+                        t = last_checkpoint_execution_time
+
+                        FAULTY = False
+
+                        t += 1
+                        d += 1
+                        print("switching to uniform!")
+                        last_checkpoint = checkpoint.time
+                        BREAKOUT = True
+                        break
+
+                    last_checkpoint_execution_time = t
+                    last_checkpoint = checkpoint.time
+
+            if BREAKOUT:
+                break
+
+            t += 1
+            d += 1
+
+        if d > self.deadline:
+            raise Exception("Deadline missed!!!")
+
+        E_ni = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
+        d_temp = d
+        n_checkpoint_ui = 0
+
+        uniform_scheme = uniforms[uniform_index]
+        while t <= self.execution_time and d <= self.deadline:
+            if d and d % 100 == 0:
+                print("task execution status: (executed time: %d, total time: %d)" % (t, d))
+
+            for fault in self.faults:
+                if fault.time == d:
+                    print("fault occured!")
+                    FAULTY = True
+                    self.faults.remove(fault)
+
+            CONTINUE = False
+
+            for checkpoint in uniform_scheme:
+                if checkpoint.time == d:
+                    print("checkpoint set!")
+                    d += self.checkpoint_insertion
+                    print(checkpoint)
+                    n_checkpoint_ui += 1
+                    uniform_scheme.remove(checkpoint)
+                    if FAULTY:
+                        print("fault detected!!")
+                        print("rollback to %d" % last_checkpoint_execution_time)
+                        t = last_checkpoint_execution_time
+                        FAULTY = False
+
+                    CONTINUE = True
+
+                    last_checkpoint = checkpoint.time
+                    last_checkpoint_execution_time = t
+
+                    break
+
+            if CONTINUE:
+                continue
+
+            t += 1
+            d += 1
+
+
+        if d > self.deadline:
+            raise Exception("Deadline missed!!!")
+        else:
+            print("Task finished!")
+            print("Total execution time: %d" % (d-1))
+            E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint_ui * CONST_E_MEM
+            print("Power consumption in non-uniform state: %f" % E_ni)
+            print("Power consumption in uniform state: %f" % E_ui)
+            print("Total power consumption state: %f" % (E_ni + E_ui))
+            R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint_ui + n_checkpoint)
+            print("Reliability: %f" % R)
+        self.tolerable_faults = k_tmp
