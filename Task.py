@@ -59,7 +59,10 @@ class Task:
 
         fault_rate = self.core.calculate_fault_rate(v)
 
-        WCET = self.calculate_wcet(k, n, et)
+        if n == 0:
+            WCET = et
+        else:
+            WCET = self.calculate_wcet(k, n, et)
         
         R = 0
         for i in range(k+1):
@@ -642,3 +645,24 @@ class Task:
         print("Total power consumption state: %f" % E_ui)
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
         print("Reliability: %f" % R)
+
+    def find_minimum_k(self, R_target, v, f):
+        R = 0
+        k = 0
+        p = f / self.core.voltage_frequency[-1].f
+        et = self.execution_time / p
+        while True:
+            if k == 0:
+                n_optu = 0
+            else:
+                n_optu = self.calculate_n_optu(k, et)
+
+            R = self.calculate_reliability(k, v, f, n_optu)
+
+            if R >= R_target:
+                break
+
+            k += 1
+        
+        print(k)
+        return k
