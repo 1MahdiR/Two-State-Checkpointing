@@ -21,23 +21,11 @@ class Core:
         self.voltage_frequency = sorted(voltage_frequency, key=lambda x: x.f)
         self.voltages = [ x.v for x in voltage_frequency ]
         self.initial_fault_rate = initial_fault_rate
-        self.operating = voltage_frequency[-1]
         self.I_sub = I_sub
         self.C_eff = C_eff
         self.delta = delta
 
-        self.frequency_norm = list()
-        freq_temp = list()
-        for i in voltage_frequency: # get the operating frequencies and voltages
-            freq_temp.append(i.f)
-
-        max_f = max(freq_temp)
-
-        for i in freq_temp: # normalizing frequencies
-            self.frequency_norm.append(i / max_f)
-
     def calculate_power_consumption(self, f, v):
-        # based on operating voltage-frequency
         return (self.I_sub * v) + \
             (self.C_eff * v * v * f)
 
@@ -46,9 +34,8 @@ class Core:
 
 
     def __repr__(self):
-        return "core(operating: %s, voltage-frequency:%s, I_sub:%f, C_eff:%f, delta:%f)" % \
-                                                                            (self.operating,
-                                                                             self.voltage_frequency,
+        return "core(voltage-frequency:%s, I_sub:%f, C_eff:%f, delta:%f)" % \
+                                                                            (self.voltage_frequency,
                                                                              self.I_sub,
                                                                              self.C_eff,
                                                                              self.delta)

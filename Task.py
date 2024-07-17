@@ -157,7 +157,6 @@ class Task:
         else:
             while t > 0:
                 n = self.calculate_n_optu(k-1, t)
-                #print(n)
                 ni = floor(d - (r + self.calculate_wcet(k-1, n, t)))
                 ui = t // n
 
@@ -184,7 +183,10 @@ class Task:
         f = self.core.voltage_frequency[-1].f
 
         schemes = self.calculate_all_checkpoint_schemes()
-        print(schemes)
+        print("All checkpointing schemes:")
+        for item in schemes:
+            print(item)
+        print()
 
         non_uniforms = list()
         uniforms = list()
@@ -195,7 +197,6 @@ class Task:
         FAULTY = False
 
         last_checkpoint_execution_time = 0
-        last_checkpoint = 0
         n_checkpoint = 0
         uniform_index = -1
 
@@ -231,12 +232,10 @@ class Task:
                         t += 1
                         d += 1
                         print("switching to uniform!")
-                        last_checkpoint = checkpoint.time
                         BREAKOUT = True
                         break
 
                     last_checkpoint_execution_time = t
-                    last_checkpoint = checkpoint.time
 
             if BREAKOUT:
                 break
@@ -279,7 +278,6 @@ class Task:
 
                     CONTINUE = True
 
-                    last_checkpoint = checkpoint.time
                     last_checkpoint_execution_time = t
 
                     break
@@ -294,7 +292,9 @@ class Task:
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
         else:
+            print()
             print("Task finished!")
+            print("--------------")
             print("Total execution time: %d" % (d-1))
             E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint_ui * CONST_E_MEM
             print("Power consumption in non-uniform state: %f" % E_ni)
@@ -381,9 +381,10 @@ class Task:
         d = 0
 
         schemes = self.calculate_all_checkpoint_schemes_with_best_dvs()
-        #for i in schemes:
-        #    print(i)
-        #    print()
+        print("All checkpointing schemes:")
+        for item in schemes:
+            print(item)
+        print()
 
         scheme = schemes[0]
         p = scheme[0][1]
@@ -402,7 +403,6 @@ class Task:
         FAULTY = False
 
         last_checkpoint_execution_time = 0
-        last_checkpoint = 0
         n_checkpoint = 0
         uniform_index = -1
 
@@ -440,12 +440,10 @@ class Task:
                         d += 1
                         print("switching to uniform!")
                         print("DVS disabled.")
-                        last_checkpoint = checkpoint.time
                         BREAKOUT = True
                         break
 
                     last_checkpoint_execution_time = t
-                    last_checkpoint = checkpoint.time
 
             if BREAKOUT:
                 break
@@ -491,12 +489,9 @@ class Task:
 
                     CONTINUE = True
 
-                    last_checkpoint = checkpoint.time
                     last_checkpoint_execution_time = t
 
                     break
-
-            #print(t, d)
 
             if CONTINUE:
                 continue
@@ -508,7 +503,9 @@ class Task:
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
         else:
+            print()
             print("Task finished!")
+            print("--------------")
             print("Total execution time: %d" % (d-1))
             v_tmp, f_tmp = v, f
             v = self.core.voltage_frequency[-1].v
@@ -528,12 +525,14 @@ class Task:
         f = self.core.voltage_frequency[-1].f
 
         schemes = self.calculate_all_checkpoint_schemes()
-
+        
         non_uniforms = list()
         for i in schemes:
             non_uniforms.append(i[0])
 
+        print("Checkpointing scheme:")
         print(non_uniforms)
+        print()
 
         FAULTY = False
 
@@ -581,7 +580,9 @@ class Task:
 
         E_ni = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
 
+        print()
         print("Task finished!")
+        print("--------------")
         print("Total execution time: %d" % (d-1))
         print("Total power consumption state: %f" % E_ni)
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
@@ -595,7 +596,9 @@ class Task:
         f = self.core.voltage_frequency[-1].f
 
         scheme = self.calculate_uniform_checkpoint_scheme()
+        print("Checkpointing scheme:")
         print(scheme)
+        print()
 
         FAULTY = False
 
@@ -643,7 +646,9 @@ class Task:
 
         E_ui = d * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
 
+        print()
         print("Task finished!")
+        print("--------------")
         print("Total execution time: %d" % (d-1))
         print("Total power consumption state: %f" % E_ui)
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
@@ -681,7 +686,10 @@ class Task:
         self.tolerable_faults = k
 
         schemes = self.calculate_all_checkpoint_schemes()
-        print(schemes)
+        print("All checkpointing schemes:")
+        for item in schemes:
+            print(item)
+        print()
 
         non_uniforms = list()
         uniforms = list()
@@ -692,7 +700,6 @@ class Task:
         FAULTY = False
 
         last_checkpoint_execution_time = 0
-        last_checkpoint = 0
         n_checkpoint = 0
         uniform_index = -1
 
@@ -728,12 +735,10 @@ class Task:
                         t += 1
                         d += 1
                         print("switching to uniform!")
-                        last_checkpoint = checkpoint.time
                         BREAKOUT = True
                         break
 
                     last_checkpoint_execution_time = t
-                    last_checkpoint = checkpoint.time
 
             if BREAKOUT:
                 break
@@ -776,7 +781,6 @@ class Task:
 
                     CONTINUE = True
 
-                    last_checkpoint = checkpoint.time
                     last_checkpoint_execution_time = t
 
                     break
@@ -791,7 +795,9 @@ class Task:
         if d > self.deadline:
             raise Exception("Deadline missed!!!")
         else:
+            print()
             print("Task finished!")
+            print("--------------")
             print("Total execution time: %d" % (d-1))
             E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint_ui * CONST_E_MEM
             print("Power consumption in non-uniform state: %f" % E_ni)
