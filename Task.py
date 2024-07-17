@@ -50,12 +50,13 @@ class Task:
 
         self.checkpoints = []
 
-    def calculate_reliability(self, k, v, f, n):
+    def calculate_reliability(self, k, v, f, n, et=None):
         f_max = self.core.voltage_frequency[-1].f
         v_max = max(self.core.voltages)
         p = f / f_max
 
-        et = self.execution_time / p
+        if et == None:
+            et = self.execution_time / p
 
         fault_rate = self.core.calculate_fault_rate(v)
 
@@ -458,7 +459,9 @@ class Task:
         E_ni = (d / p) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
         d_temp = d
         n_checkpoint_ui = 0
+        R1 = self.calculate_reliability(1, v, f, n_checkpoint, t)
         t = floor(t * p)
+        t_tmp = t
 
         uniform_scheme = uniforms[uniform_index]
         while t <= self.execution_time and d <= self.deadline:
@@ -514,8 +517,8 @@ class Task:
             print("Power consumption in non-uniform state: %f" % E_ni)
             print("Power consumption in uniform state: %f" % E_ui)
             print("Total power consumption state: %f" % (E_ni + E_ui))
-            R = self.calculate_reliability(self.tolerable_faults, v_tmp, f_tmp, (n_checkpoint + n_checkpoint_ui))
-            print("Reliability: %f" % R)
+            R2 = self.calculate_reliability(self.tolerable_faults-1, v_tmp, f_tmp, n_checkpoint_ui, t-t_tmp)
+            print("Reliability: %f" % (R1 * R2))
 
     def run_non_uniform(self):
         t = 0
