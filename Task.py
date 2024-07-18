@@ -181,6 +181,8 @@ class Task:
         v = self.core.voltage_frequency[-1].v
         f = self.core.voltage_frequency[-1].f
 
+        faults = self.faults.copy()
+
         schemes = self.calculate_all_checkpoint_schemes()
         print("All checkpointing schemes:")
         for item in schemes:
@@ -204,12 +206,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             BREAKOUT = False
 
@@ -255,12 +257,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             CONTINUE = False
 
@@ -302,6 +304,8 @@ class Task:
             print("Total power consumption state: %f" % (E_ni + E_ui))
             R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint_ui + n_checkpoint)
             print("Reliability: %f" % R)
+
+        return (d-1, E_ni + E_ui, R)
 
     def calculate_scheme_energy(self, scheme, p, f, v):
         return ((self.execution_time + len(scheme) * self.checkpoint_insertion) / p) * self.core.calculate_power_consumption(f, v) + len(scheme) * CONST_E_MEM
@@ -387,6 +391,8 @@ class Task:
         f = scheme[0][2]
         v = scheme[0][3]
 
+        faults = self.faults.copy()
+
         checkpointing_scheme = tuple([ x[0] for x in scheme ])
         print("All checkpointing schemes:")
         for item in checkpointing_scheme:
@@ -411,12 +417,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             BREAKOUT = False
 
@@ -466,12 +472,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             CONTINUE = False
 
@@ -517,12 +523,16 @@ class Task:
             R2 = self.calculate_reliability(self.tolerable_faults-1, v_tmp, f_tmp, n_checkpoint_ui, t-t_tmp)
             print("Reliability: %f" % (R1 * R2))
 
+        return (d-1, E_ni + E_ui, R1 * R2)
+
     def run_non_uniform(self):
         t = 0
         d = 0
 
         v = self.core.voltage_frequency[-1].v
         f = self.core.voltage_frequency[-1].f
+
+        faults = self.faults.copy()
 
         schemes = self.calculate_all_checkpoint_schemes()
         
@@ -545,12 +555,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             for checkpoint in non_uniforms:
                 if checkpoint.time == d:
@@ -589,12 +599,16 @@ class Task:
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
         print("Reliability: %f" % R)
 
+        return (d-1, E_ni, R)
+
     def run_uniform(self):
         t = 0
         d = 0
 
         v = self.core.voltage_frequency[-1].v
         f = self.core.voltage_frequency[-1].f
+
+        faults = self.faults.copy()
 
         scheme = self.calculate_uniform_checkpoint_scheme()
         print("Checkpointing scheme:")
@@ -612,12 +626,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             for checkpoint in scheme:
                 if checkpoint.time == d:
@@ -656,6 +670,8 @@ class Task:
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
         print("Reliability: %f" % R)
 
+        return (d-1, E_ui, R)
+
     def find_minimum_k(self, R_target, v, f):
         R = 0
         k = 0
@@ -682,6 +698,8 @@ class Task:
 
         v = self.core.voltage_frequency[-1].v
         f = self.core.voltage_frequency[-1].f
+
+        faults = self.faults.copy()
 
         k = self.find_minimum_k(R_target, v, f)
         k_tmp = self.tolerable_faults
@@ -710,12 +728,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             BREAKOUT = False
 
@@ -761,12 +779,12 @@ class Task:
             if d and d % 100 == 0:
                 print("task execution status: (executed time: %d, total time: %d)" % (t, d))
 
-            for fault in self.faults:
+            for fault in faults:
                 if fault.time == d:
                     print("fault occured!")
                     print(fault)
                     FAULTY = True
-                    self.faults.remove(fault)
+                    faults.remove(fault)
 
             CONTINUE = False
 
@@ -809,3 +827,5 @@ class Task:
             R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint_ui + n_checkpoint)
             print("Reliability: %f" % R)
         self.tolerable_faults = k_tmp
+
+        return (d-1, E_ni + E_ui, R)
