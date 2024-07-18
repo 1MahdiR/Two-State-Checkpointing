@@ -298,14 +298,14 @@ class Task:
             print(OKGREEN + BOLD + "Task finished!" + ENDC)
             print(OKGREEN + BOLD + "--------------" + ENDC)
             print("Total execution time: %d" % (d-1))
-            E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + n_checkpoint_ui * CONST_E_MEM
+            E_ui = (d - d_temp) * self.core.calculate_power_consumption(f, v) + (n_checkpoint_ui + n_checkpoint) * CONST_E_MEM
             print("Power consumption in non-uniform state: %f" % E_ni)
             print("Power consumption in uniform state: %f" % E_ui)
             print("Total power consumption state: %f" % (E_ni + E_ui))
             R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint_ui + n_checkpoint)
             print("Reliability: %f" % R)
 
-        return (d-1, E_ni + E_ui, R)
+        return (d-1, E_ni + E_ui, R, n_checkpoint + n_checkpoint_ui)
 
     def calculate_scheme_energy(self, scheme, p, f, v):
         return ((self.execution_time + len(scheme) * self.checkpoint_insertion) / p) * self.core.calculate_power_consumption(f, v) + len(scheme) * CONST_E_MEM
@@ -523,7 +523,7 @@ class Task:
             R2 = self.calculate_reliability(self.tolerable_faults-1, v_tmp, f_tmp, n_checkpoint_ui, t-t_tmp)
             print("Reliability: %f" % (R1 * R2))
 
-        return (d-1, E_ni + E_ui, R1 * R2)
+        return (d-1, E_ni + E_ui, R1 * R2, n_checkpoint + n_checkpoint_ui)
 
     def run_non_uniform(self):
         t = 0
@@ -599,7 +599,7 @@ class Task:
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
         print("Reliability: %f" % R)
 
-        return (d-1, E_ni, R)
+        return (d-1, E_ni, R, n_checkpoint)
 
     def run_uniform(self):
         t = 0
@@ -670,7 +670,7 @@ class Task:
         R = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint)
         print("Reliability: %f" % R)
 
-        return (d-1, E_ui, R)
+        return (d-1, E_ui, R, n_checkpoint)
 
     def find_minimum_k(self, R_target, v, f):
         R = 0
@@ -828,4 +828,4 @@ class Task:
             print("Reliability: %f" % R)
         self.tolerable_faults = k_tmp
 
-        return (d-1, E_ni + E_ui, R)
+        return (d-1, E_ni + E_ui, R, n_checkpoint + n_checkpoint_ui)
