@@ -463,7 +463,7 @@ class Task:
         E_ni = (d / p) * self.core.calculate_power_consumption(f, v) + n_checkpoint * CONST_E_MEM
         d_temp = d
         n_checkpoint_ui = 0
-        R1 = self.calculate_reliability(1, v, f, n_checkpoint, t)
+        R1 = self.calculate_reliability(self.tolerable_faults, v, f, n_checkpoint, t)
         t = floor(t * p)
         t_tmp = t
 
@@ -520,7 +520,7 @@ class Task:
             print("Power consumption in non-uniform state: %f" % E_ni)
             print("Power consumption in uniform state: %f" % E_ui)
             print("Total power consumption state: %f" % (E_ni + E_ui))
-            R2 = self.calculate_reliability(self.tolerable_faults-1, v_tmp, f_tmp, n_checkpoint_ui, t-t_tmp)
+            R2 = self.calculate_reliability(self.tolerable_faults, v_tmp, f_tmp, n_checkpoint_ui, t-t_tmp)
             print("Reliability: %f" % (R1 * R2))
 
         return (d-1, E_ni + E_ui, R1 * R2, n_checkpoint + n_checkpoint_ui)

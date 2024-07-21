@@ -49,7 +49,7 @@ if __name__ == "__main__":
         ax = plt.subplot(1, 1, 1)
         bar_width = 0.35
         ax.bar(schemes_labels, r_ls, bar_width, label="r_ls", color="blue")
-        ax.set_ylim(0.9, 1.01)
+        ax.set_ylim(min(r_ls) - 0.01, 1.01)
         for i, v in enumerate(r_ls):
             ax.text(i, v, str(round(v, 6)), ha='center', va='bottom')  
         plt.title("Reliability by Different Schemes")
