@@ -4,7 +4,7 @@ from math import e as e_num
 from Core import Core
 from bcolor import *
 
-CONST_E_MEM = 4.6
+CONST_E_MEM = 500
 
 class Fault:
     def __init__(self, time: int):

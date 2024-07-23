@@ -197,5 +197,135 @@ class bench_3:
 
         print()
         return data
+    
+class bench_4:
+    vf_1 = Volatage_Frequency(2.25, 3)
+    vf_2 = Volatage_Frequency(2.4375, 3.25)
+    vf_3 = Volatage_Frequency(2.625, 3.5)
+    vf_4 = Volatage_Frequency(3, 4)
 
-BENCH = [bench_1, bench_2, bench_3]
+    i_sub = 1
+    c_eff = 1
+    delta = 3
+
+    lambda_0 = 10 ** -4
+
+    c = Core([vf_1, vf_2, vf_3, vf_4], lambda_0, i_sub, c_eff, delta)
+
+    f1 = Fault(600)
+    f2 = Fault(665)
+
+    fault_ls = [f1, f2]
+
+    checkpoint_insertion_overhead = 10
+    rollback_overhead = 10
+
+    et = 930
+    d = 1380
+
+
+    t = Task(et, len(fault_ls), d, c, fault_ls, 
+             checkpoint_insertion_overhead, rollback_overhead)
+
+    def run_bench():
+
+        data = []
+
+        print(BOLD + ("### Starting '%s' ###" % bench_4.__name__) + ENDC)
+        print(BOLD + "--- TsCp Begin ---" + ENDC)
+        data.append(bench_4.t.run())
+        print(BOLD + "--- TsCp End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- TsCp-DVS Begin ---" + ENDC)
+        data.append(bench_4.t.run_dvs())
+        print(BOLD + "--- TsCp-DVS End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- Non-Uniform Begin ---" + ENDC)
+        data.append(bench_4.t.run_non_uniform())
+        print(BOLD + "--- Non-Uniform End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- Uniform Begin ---" + ENDC)
+        data.append(bench_4.t.run_uniform())
+        print(BOLD + "--- Uniform End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
+        data.append(bench_4.t.run_reliability_taret(0.99999))
+        print(BOLD + "--- Reliability-Target End ---" + ENDC)
+        print(BOLD + ("### '%s' Finished ###" % bench_4.__name__) + ENDC)
+
+        print()
+        return data
+
+class bench_5:
+    vf_1 = Volatage_Frequency(2, 3)
+    vf_2 = Volatage_Frequency(2.25, 4)
+
+    i_sub = 1
+    c_eff = 1
+    delta = 3
+
+    lambda_0 = 10 ** -4
+
+    c = Core([vf_1, vf_2], lambda_0, i_sub, c_eff, delta)
+
+    f1 = Fault(150)
+    f2 = Fault(780)
+
+    fault_ls = [f1, f2]
+
+    checkpoint_insertion_overhead = 10
+    rollback_overhead = 10
+
+    et = 1000
+    d = 2000
+
+
+    t = Task(et, len(fault_ls), d, c, fault_ls, 
+             checkpoint_insertion_overhead, rollback_overhead)
+
+    def run_bench():
+
+        data = []
+
+        print(BOLD + ("### Starting '%s' ###" % bench_5.__name__) + ENDC)
+        print(BOLD + "--- TsCp Begin ---" + ENDC)
+        data.append(bench_5.t.run())
+        print(BOLD + "--- TsCp End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- TsCp-DVS Begin ---" + ENDC)
+        data.append(bench_5.t.run_dvs())
+        print(BOLD + "--- TsCp-DVS End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- Non-Uniform Begin ---" + ENDC)
+        data.append(bench_5.t.run_non_uniform())
+        print(BOLD + "--- Non-Uniform End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- Uniform Begin ---" + ENDC)
+        data.append(bench_5.t.run_uniform())
+        print(BOLD + "--- Uniform End ---" + ENDC)
+
+        print()
+
+        print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
+        data.append(bench_5.t.run_reliability_taret(0.99999))
+        print(BOLD + "--- Reliability-Target End ---" + ENDC)
+        print(BOLD + ("### '%s' Finished ###" % bench_5.__name__) + ENDC)
+
+        print()
+        return data
+
+BENCH = [bench_1, bench_2, bench_3, bench_4, bench_5]
