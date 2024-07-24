@@ -50,6 +50,12 @@ class Task:
 
         self.checkpoints = []
 
+    def __repr__(self):
+        return WARNING + ("task(WCET:%d, deadline:%d)" % (self.execution_time, self.deadline)) + ENDC
+
+    def __str__(self):
+        return self.__repr__()
+
     def calculate_reliability(self, k, v, f, n, et=None):
         f_max = self.core.voltage_frequency[-1].f
         p = f / f_max
