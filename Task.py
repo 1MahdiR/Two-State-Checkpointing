@@ -354,7 +354,7 @@ class Task:
 
                     d = d - (ni - c)/p
                     t = t - ni
-                    shift = shift + ni + c
+                    shift = shift + (ni + c)/p
             else:
                 while t > 0:
                     n = self.calculate_n_optu(k-1, t)
@@ -377,7 +377,7 @@ class Task:
 
                     d = d - (ni - c)/p
                     t = t - ni
-                    shift = shift + ni + c
+                    shift = shift + (ni + c)/p
 
             if FEASIBLE:
                 all_schemes.append(schemes)
@@ -573,9 +573,11 @@ class Task:
                     print("checkpoint set!")
                     n_checkpoint += 1
                     d += self.checkpoint_insertion
+                    last_checkpoint_execution_time = t
                     print(checkpoint)
 
                     non_uniforms.remove(checkpoint)
+                    
                     if FAULTY:
                         print("fault detected!!")
                         print("rollback to %d" % last_checkpoint_execution_time)
@@ -586,9 +588,7 @@ class Task:
                         t += 1
                         d += 1
                         break
-
-                    last_checkpoint_execution_time = t
-
+                    
             t += 1
             d += 1
 
