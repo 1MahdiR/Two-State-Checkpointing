@@ -64,5 +64,5 @@ def crc32file(name):
         oldcrc32 = ~oldcrc32 & 0xFFFFFFFFFFFFFFFF
         return oldcrc32, charcnt
 
-crc, charcnt = crc32file("large.pcm")
+crc, charcnt = crc32file("mibench/telecomm/CRC32/large.pcm")
 print(f"{crc:016X} {charcnt:7d} large.pcm")
