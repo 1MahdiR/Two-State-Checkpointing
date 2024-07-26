@@ -698,7 +698,7 @@ class Task:
             
         return k
     
-    def run_reliability_taret(self, R_target):
+    def run_reliability_target(self, R_target):
         t = 0
         d = 0
 

@@ -12,8 +12,6 @@ from Core import Core, Volatage_Frequency
 from bcolor import *
 
 NULL = open(os.devnull, 'w')
-STDOUT = sys.stdout
-
 PLOT_ALL = True
 schemes_labels = ["TsCp", "TsCp-DVS", "Non-Uniform", "Uniform", "R_target(0.99999)"]
 
@@ -106,7 +104,7 @@ for script in script_names:
         print()
 
         print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
-        data.append(task.run_reliability_taret(0.99999))
+        data.append(task.run_reliability_target(0.99999))
         print(BOLD + "--- Reliability-Target End ---" + ENDC)
         print(BOLD + ("### '%s' Finished ###" % script) + ENDC)
     except Exception:

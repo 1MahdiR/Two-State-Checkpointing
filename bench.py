@@ -58,7 +58,7 @@ class bench_1:
         print()
 
         print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
-        data.append(bench_1.t.run_reliability_taret(0.99999))
+        data.append(bench_1.t.run_reliability_target(0.99999))
         print(BOLD + "--- Reliability-Target End ---" + ENDC)
         print(BOLD + ("### '%s' Finished ###" % bench_1.__name__) + ENDC)
 
@@ -124,7 +124,7 @@ class bench_2:
         print()
 
         print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
-        data.append(bench_2.t.run_reliability_taret(0.99999))
+        data.append(bench_2.t.run_reliability_target(0.99999))
         print(BOLD + "--- Reliability-Target End ---" + ENDC)
         print(BOLD + ("### '%s' Finished ###" % bench_2.__name__) + ENDC)
 
@@ -191,7 +191,7 @@ class bench_3:
         print()
 
         print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
-        data.append(bench_3.t.run_reliability_taret(0.99999))
+        data.append(bench_3.t.run_reliability_target(0.99999))
         print(BOLD + "--- Reliability-Target End ---" + ENDC)
         print(BOLD + ("### '%s' Finished ###" % bench_3.__name__) + ENDC)
 
@@ -257,7 +257,7 @@ class bench_4:
         print()
 
         print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
-        data.append(bench_4.t.run_reliability_taret(0.99999))
+        data.append(bench_4.t.run_reliability_target(0.99999))
         print(BOLD + "--- Reliability-Target End ---" + ENDC)
         print(BOLD + ("### '%s' Finished ###" % bench_4.__name__) + ENDC)
 
@@ -321,7 +321,7 @@ class bench_5:
         print()
 
         print(BOLD + "--- Reliability-Target Begin ---" + ENDC)
-        data.append(bench_5.t.run_reliability_taret(0.99999))
+        data.append(bench_5.t.run_reliability_target(0.99999))
         print(BOLD + "--- Reliability-Target End ---" + ENDC)
         print(BOLD + ("### '%s' Finished ###" % bench_5.__name__) + ENDC)
 
