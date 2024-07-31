@@ -573,7 +573,6 @@ class Task:
                     print("checkpoint set!")
                     n_checkpoint += 1
                     d += self.checkpoint_insertion
-                    last_checkpoint_execution_time = t
                     print(checkpoint)
 
                     non_uniforms.remove(checkpoint)
@@ -588,6 +587,8 @@ class Task:
                         t += 1
                         d += 1
                         break
+
+                    last_checkpoint_execution_time = t
                     
             t += 1
             d += 1

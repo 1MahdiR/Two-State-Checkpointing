@@ -15,7 +15,7 @@ class bench_1:
     c = Core([vf_1, vf_2], lambda_0, i_sub, c_eff, delta)
 
     f1 = Fault(90)
-    f2 = Fault(490)
+    f2 = Fault(450)
 
     fault_ls = [f1, f2]
 
@@ -82,7 +82,7 @@ class bench_2:
     c = Core([vf_1, vf_2], lambda_0, i_sub, c_eff, delta)
 
     f1 = Fault(90)
-    f2 = Fault(490)
+    f2 = Fault(450)
 
     fault_ls = [f1, f2]
 
@@ -149,7 +149,7 @@ class bench_3:
     c = Core([vf_1, vf_2], lambda_0, i_sub, c_eff, delta)
 
     f1 = Fault(90)
-    f2 = Fault(490)
+    f2 = Fault(450)
 
     fault_ls = [f1, f2]
 
@@ -216,7 +216,7 @@ class bench_4:
     c = Core([vf_1, vf_2], lambda_0, i_sub, c_eff, delta)
 
     f1 = Fault(90)
-    f2 = Fault(490)
+    f2 = Fault(450)
 
     fault_ls = [f1, f2]
 
@@ -270,5 +270,4 @@ class bench_4:
         print()
         return data
 
-#BENCH = [bench_1, bench_2, bench_3, bench_4, bench_5]
 BENCH = [bench_1, bench_2, bench_3, bench_4]

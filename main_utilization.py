@@ -4,7 +4,7 @@ from bench_utilization import BENCH
 
 BENCH_LENGTH = len(BENCH)
 
-PLOT_ALL = True
+PLOT_ALL = False
 
 if __name__ == "__main__":
     et_data = {'TsCp':0, "TsCp-DVS":0, "Non-Uniform":0, "Uniform":0, "R_target":0}
@@ -12,6 +12,7 @@ if __name__ == "__main__":
     r_data = {'TsCp':0, "TsCp-DVS":0, "Non-Uniform":0, "Uniform":0, "R_target":0}
     k_data = {'TsCp':0, "TsCp-DVS":0, "Non-Uniform":0, "Uniform":0, "R_target":0}
     schemes_labels = ["TsCp", "TsCp-DVS", "Non-Uniform", "Uniform", "R_target(0.99999)"]
+    bench_data = {}
     for bench in BENCH:
         data = bench.run_bench()
         et_ls = []
@@ -19,13 +20,15 @@ if __name__ == "__main__":
         r_ls = []
         k_ls = []
         d = bench.d
-        
+
         for i in data:
             et, e, r, k = i
             et_ls.append(et)
             e_ls.append(e)
             r_ls.append(r)
             k_ls.append(k)
+
+        bench_data[bench.util * 100] = [et_ls, e_ls, r_ls, k_ls]
 
         et_data["TsCp"] += et_ls[0]
         et_data["TsCp-DVS"] += et_ls[1]
@@ -60,7 +63,7 @@ if __name__ == "__main__":
             for i, v in enumerate(et_ls):
                 ax.text(i, v + 0.5, str(v), ha='center', va='bottom')
             ax.axhline(y=d, color='red', linestyle='-', label=f'Deadline ({d})')  
-            plt.title("Execution Time by Different Schemes")
+            plt.title("Execution Time by Different Schemes (U = %{})".format(bench.util * 100))
             plt.ylabel("execution time")
             plt.tight_layout()
             plt.show()
@@ -72,7 +75,7 @@ if __name__ == "__main__":
             ax.set_ylim(min(e_ls) - 1000, max(e_ls) + 1000)
             for i, v in enumerate(e_ls):
                 ax.text(i, v + 0.5, str(round(v, 2)), ha='center', va='bottom')  
-            plt.title("Energy Consumption by Different Schemes")
+            plt.title("Energy Consumption by Different Schemes (U = %{})".format(bench.util * 100))
             plt.ylabel("energy consumption")
             plt.tight_layout()
             plt.show()
@@ -84,7 +87,7 @@ if __name__ == "__main__":
             ax.set_ylim(min(r_ls) - 0.01, 1.001)
             for i, v in enumerate(r_ls):
                 ax.text(i, v, str(round(v, 6)), ha='center', va='bottom')  
-            plt.title("Reliability by Different Schemes")
+            plt.title("Reliability by Different Schemes (U = %{})".format(bench.util * 100))
             plt.ylabel("reliability")
             plt.tight_layout()
             plt.show()
@@ -96,7 +99,7 @@ if __name__ == "__main__":
             ax.set_ylim(min(k_ls) - 1, max(k_ls) + 1)
             for i, v in enumerate(k_ls):
                 ax.text(i, v, str(round(v, 2)), ha='center', va='bottom')  
-            plt.title("Number of Checkpoints by Different Schemes")
+            plt.title("Number of Checkpoints by Different Schemes (U = %{})".format(bench.util * 100))
             plt.ylabel("number of checkpoints")
             plt.tight_layout()
             plt.show()
@@ -152,3 +155,24 @@ if __name__ == "__main__":
     plt.ylabel("number of checkpoints")
     plt.tight_layout()
     plt.show()
+
+    bar_width = 0.35
+    methods = ["TsCp", "TsCp-DVS", "Nonuniform", "Uniform", "R_target"]
+    metrics = ["Execution Time", "Energy", "Reliability", "Number of Checkpoints"]
+    method_style = {"TsCp":("blue", "o"), "TsCp-DVS":("darkblue", "^"), "Uniform":("green", "v"), "Nonuniform":("red", "s"), "R_target":("purple", "h")}
+
+    utilization_levels = sorted(bench_data.keys())
+    num_metrics = len(metrics)
+    for metric_idx in range(num_metrics):
+        plt.figure(figsize=(10, 6))
+        
+        for method_idx, method in enumerate(methods):
+            metric_values = [bench_data[utilization][metric_idx][method_idx] for utilization in utilization_levels]
+            plt.plot(utilization_levels, metric_values, marker=method_style[method][1], linestyle='-', label=method, color=method_style[method][0])
+        
+        plt.title(f'{metrics[metric_idx]} based on Utilization Levels')
+        plt.xlabel('Utilization Levels (%)')
+        plt.ylabel(metrics[metric_idx])
+        plt.legend()
+        plt.grid(True)
+        plt.show()
