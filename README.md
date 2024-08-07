@@ -20,7 +20,7 @@ This implementation is just a simulation and comparison of the TsCp (and TsCp-DV
 **note:** You'll probably need the `matplotlib==3.5.1` python package for the graphs and plots.
 
 ## About the 'Reliability-Aware' checkpointing technique
-As I said before this method runs in a way that meets a certain level of reliability. It takes a reliability target as input and based on the parameters (like task execution time, etc.) it calculates how many faults the checkpointing scheme should be able to tolerate to meet the reliability target. After calculating, it will set the checkpointing scheme like a normal TsCp and execute it. 
+As I said before this method runs in a way that meets a certain level of reliability while other methods only takes the number of tolerable faults and set the checkpointing scheme based on that number. 'Reliability-Aware' approach takes a reliability target as input and based on the parameters (like task execution time, etc.) it calculates how many faults the checkpointing scheme should be able to tolerate to meet the reliability target. After calculating, it will set the checkpointing scheme like a normal TsCp and execute it. 
 
 ## Running the simulation
 
@@ -49,7 +49,7 @@ If you want to run this simulation run the 'main_utilization.py' file.
 
 ## Configuration
 
-Like I said you can change the configuration of the benchmarks. These benchmarks are at these addresses:
+Like I said you can change the configuration of the benchmarks. These benchmarks are at these addresses in the project:
 - synthetic: 'bench.py' file
 - MiBench: 'mibench/' directory
 - utilization-based: 'bench_utilization.py' file
